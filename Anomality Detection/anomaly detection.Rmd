@@ -1,0 +1,103 @@
+---
+title: "Carrefour customer strategies, Anomaly detection"
+author: "John Maronga"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+# Installing anomalize package
+# ---
+# 
+install.packages("anomalize")
+```
+```{r}
+# Load tidyverse and anomalize
+# ---
+# 
+library(tidyverse)
+library(anomalize)
+
+```
+
+
+## Including Plots
+
+
+
+```{r}
+#Installing and reading the required libraries
+library(dplyr)
+library(tidyr)
+library(lubridate)
+pkg <- c('tidyverse','tibbletime','anomalize','timetk')
+install.packages(pkg)
+library(tidyverse)
+library(tibbletime)
+library(anomalize)
+library(timetk)
+
+```
+## Part 1: Dimensionality Reduction
+### 1.1 Data Understanding
+
+```{r}
+#Loading the dataset
+anoma <- read.csv('http://bit.ly/CarreFourSalesDataset')
+# Checking the first 6 rows of the dataset
+head(anoma)
+```
+```{r}
+# Getting high level overview of the dataset
+summary(anoma)
+```
+
+
+```{r}
+# Checking the no. rows and columns
+dim(anoma)
+```
+
+### 1.2 Data Cleaning
+```{r}
+# Checking the data types in each column
+sapply(anoma,class)
+```
+
+The date column is of the character type but should be of date type
+
+```{r}
+# Changing the date column to the correct data types
+#anoma$Date <-as.Date(as.character(anoma$Date))
+anoma$Date <- as.Date(anoma$Date,format="%Y-%m-%d")
+
+```
+
+```{r}
+# Checking if the column has been updated
+sapply(anoma,class)
+```
+
+The date column has been updated
+```{r}
+anoma <- anoma %>% select(Date,Sales)
+
+```
+
+```{r}
+anoma <- as_tibble(anoma)
+class(anoma)
+
+```
+
+```{r}
+str(anoma)
+```
+
+
+
