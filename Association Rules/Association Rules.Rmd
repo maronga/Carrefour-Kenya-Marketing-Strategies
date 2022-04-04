@@ -1,0 +1,144 @@
+---
+title: "Carrefour marketing strategies"
+output:
+  word_document: default
+  html_notebook: default
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+```{r}
+path <- 'http://bit.ly/SupermarketDatasetII'
+as<-read.transactions(path, sep = ",")
+as
+```
+```{r}
+#Install the required arules library
+install.packages("arules")
+```
+```{r}
+# Loading the arules library
+library(arules)
+```
+```{r}
+# Verifying the object's class
+# ---
+# This should show us transactions as the type of data that we will need
+# ---
+# 
+class(as)
+```
+```{r}
+# Previewing our first 5 transactions
+#
+inspect(as[1:5])
+```
+```{r}
+items<-as.data.frame(itemLabels(as))
+colnames(items) <- "Item"
+head(items, 10)
+```
+
+
+```{r}
+summary(as)
+```
+
+```{r}
+# Exploring the frequency of some articles 
+# i.e. transacations ranging from 8 to 10 and performing 
+# some operation in percentage terms of the total transactions 
+# 
+itemFrequency(as[, 8:10],type = "absolute")
+round(itemFrequency(as[, 8:10],type = "relative")*100,2)
+```
+```{r}
+# Producing a chart of frequencies and fitering 
+# to consider only items with a minimum percentage 
+# of support/ considering a top x of items
+# ---
+# Displaying top 10 most common items in the transactions dataset 
+# and the items whose relative importance is at least 10%
+# 
+par(mfrow = c(1, 2))
+
+# plot the frequency of items
+itemFrequencyPlot(as, topN = 10,col="blue")
+itemFrequencyPlot(as, support = 0.1,col="yellow")
+```
+```{r}
+# Building a model based on association rules 
+# using the apriori function 
+# ---
+# We use Min Support as 0.001 and confidence as 0.9
+# ---
+# 
+rules <- apriori (as, parameter = list(supp = 0.001, conf = 0.82))
+rules
+
+```
+```{r}
+# We use measures of significance and interest on the rules, 
+# determining which ones are interesting and which to discard.
+# ---
+# However since we built the model using 0.001 Min support 
+# and confidence as 0.8 we obtained 410 rules.
+# However, in order to illustrate the sensitivity of the model to these two parameters, 
+# we will see what happens if we increase the support or lower the confidence level
+# 
+
+# Building a apriori model with Min Support as 0.002 and confidence as 0.9.
+rules2 <- apriori (as,parameter = list(supp = 0.002, conf = 0.9)) 
+
+# Building apriori model with Min Support as 0.002 and confidence as 0.9.
+rules3 <- apriori (as, parameter = list(supp = 0.001, conf = 0.9)) 
+
+rules2
+
+rules3
+```
+
+```{r}
+# We can perform an exploration of our model 
+# through the use of the summary function as shown
+# ---
+# Upon running the code, the function would give us information about the model 
+# i.e. the size of rules, depending on the items that contain these rules. 
+# In our above case, most rules have 3 and 4 items though some rules do have upto 6. 
+# More statistical information such as support, lift and confidence is also provided.
+# ---
+# 
+summary(rules)
+```
+
+```{r}
+# Observing rules built in our model i.e. first 7 model rules
+# ---
+# 
+inspect(rules[1:7])
+```
+Interpretation of rule 3: If a customer buys mushroom cream sauce and pasta, he/she is more likely to buy escalope with a confidence level of 95%
+
+```{r}
+# Ordering these rules by a criteria such as the level of confidence
+# then looking at the first five rules.
+# We can also use different criteria such as: (by = "lift" or by = "support")
+# 
+rules<-sort(rules, by="confidence", decreasing=TRUE)
+inspect(rules[1:7])
+```
+
+Interpretation: The first four rules have a confidence level of 100%
+
+
+
