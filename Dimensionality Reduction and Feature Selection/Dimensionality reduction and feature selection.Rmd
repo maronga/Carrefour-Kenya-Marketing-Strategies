@@ -1,0 +1,213 @@
+---
+title: "Carrefour Kenya Marketing Strategies"
+output:
+  word_document: default
+  html_notebook: default
+---
+
+# 1. Defining the Question
+## a) Specifying the Data Analytic Question.
+What are most relevant marketing strategies that will result in the highest no. sales at Carrefour Kenya.
+
+## b) Defining the Metric for Success
+
+## c) Understanding the context
+You are a Data analyst at Carrefour Kenya and are currently undertaking a project that will inform the marketing department on the most relevant marketing strategies that will result in the highest no. of sales (total price including tax). Your project has been divided into four parts where you'll explore a recent marketing dataset by performing various unsupervised learning techniques and later providing recommendations based on your insights.
+
+## d) Recording the Experimental Design
+Effectively cleaning our dataset.
+
+Performing extensive exploratory data analysis where applicable.
+
+Applying Dimensionality Reduction.
+
+Selecting our features.
+
+Applying Association rules.
+
+Detecting anomalies in our data.
+
+## e) Data Relevance
+
+```{r}
+#Installing and reading the required libraries
+library(dplyr)
+library(tidyr)
+library(lubridate)
+```
+## Part 1: Dimensionality Reduction
+### 1.1 Data Understanding
+
+```{r}
+#Loading the dataset
+data <- read.csv('http://bit.ly/CarreFourDataset')
+# Checking the first 6 rows of the dataset
+head(data)
+```
+
+
+```{r}
+# Checking the last 6 rows of the dataset
+tail(data)
+```
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+```{r}
+# Getting high level overview of the dataset
+summary(data)
+```
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+# Checking the no. rows and columns
+dim(data)
+```
+The dataset has 1,000 rows and 16 columns
+
+### 1.2 Data Cleaning
+```{r}
+# Checking the data types in each column
+sapply(data,class)
+```
+Observation: The columns have the correct data types apart from the data and time column
+
+
+```{r}
+# Changing the date column to the correct data types
+data$Date <-as.Date(as.character(data$Date))
+
+```
+
+
+```{r}
+# Changing the time column from character type to time type
+#strptime(data$Time, format=“%Y-%m-%d %H:%M:%S”)
+```
+```{r}
+# Checking the number of unique elements in the dataset
+lapply(data, function(x) length(table(x)))
+```
+
+```{r}
+# Checking for duplicate values in dataset
+duplicated_rows <- data[duplicated(data),]
+print(duplicated_rows)
+
+```
+```{r}
+# Checking for null values in the dataset
+is.null(data)
+```
+Observation: There are no null values in the data set
+
+## 2. Dimensionality Reduction
+### 2.1 PCA
+```{r}
+# Checking the numerical data in the dataset
+str(data)
+```
+Observation: The unit.price, cogs, gross margin percentage, gross income, rating and total are numeric
+
+```{r}
+# Selecting the numerical columns
+df <- data[c(6:8,12:16)]
+head(df)
+```
+
+```{r}
+# Ensuring our variances is not 0
+ndf <- df[ , which(apply(df, 2, var) != 0)]
+head(ndf)
+
+```
+```{r}
+# Previewing our PCAs
+ndf.pca <- prcomp(ndf, center = TRUE, scale. = TRUE)
+summary(ndf.pca)
+```
+Observation:
+We obtained 7 principal components each explaining the percentage of the total variance of the dataset
+PC1 explains a 70% of the total variance, which means that nearly two-thirds of the info in the dataset can be encapsulated by just one one Principal component.
+```{r}
+# Calling str() to have a look at your PCA object
+# ---
+# 
+str(ndf.pca)
+
+```
+
+```{r}
+# Loding the ggplot2 library
+library(ggplot2)
+library('devtools')
+install_github("vqv/ggbiplot")
+```
+
+```{r}
+# Loading the ggbiplot library
+library(ggbiplot)
+ggbiplot(ndf.pca)
+```
+
+```{r}
+# Adding more details to the plot
+ggbiplot(ndf.pca, labels=rownames(ndf), obs.scale = 1, var.scale = 3)
+```
+### 2.2 t-Distributed Stochastic Neighbor Embedding (t-SNE)
+```{r}
+#Loading the tnse library
+library(Rtsne)
+```
+
+```{r}
+
+```
+
+# Part 2: Feature Selection
+
+```{r}
+# Loading the caret 
+library(caret)
+```
+```{r}
+# Using the numeric dataset
+head(df)
+
+```
+
+
+```{r}
+# Loading the corrplot package
+library(corrplot)
+```
+
+
+
+```{r}
+# Calculating the correlation matrix
+correlationMatrix <- cor(df)
+```
+```{r}
+# Finding attributes that are highly correlated
+highlycorrelated <- findCorrelation(correlationMatrix, cutoff=0.75)
+
+# Highly correlated attributes
+# ---
+# 
+highlycorrelated
+
+names(df[,highlycorrelated])
+```
+Observation: These are the features that are highly correlated
+
+```{r}
+# We can then remove the features that are highly correlated then compare graphically
+df2<-df[-highlyCorrelated]
+head(df2)
+```
+Observation: The highly correlated variables have been removed
+
+
+
+
+
